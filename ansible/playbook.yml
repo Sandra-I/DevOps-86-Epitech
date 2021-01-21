@@ -1,0 +1,26 @@
+---
+- name: Install web servers
+  hosts: all
+  remote_user: root
+
+  tasks:
+    - name: Install prerequies
+      apt: 
+        name: aptitude
+        update_cache: yes 
+        state: latest
+        force_apt_get: yes
+
+- name: Install database server
+  hosts: database
+  remote_user: root
+
+  roles:
+    - mysql
+
+- name: Install back server
+  hosts: back
+  remote_user: root
+
+  roles:
+    - back

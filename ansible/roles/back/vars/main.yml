@@ -1,0 +1,15 @@
+php_packages:
+  - php7-zip
+  - php7-common
+  - php7-cli
+  - php7-curl
+  - php7-json
+  - php7-mbstring 
+  - php7.0-mysql 
+  - php7.0-xml
+  - php7.0-mcrypt
+  - php7.0
+php_timezone: Europe/Paris
+php_upload_max_filesize: "20M"
+php_post_max_size: "20M"
+php_memory_limit: "1024M"

@@ -1,25 +1,44 @@
 ---
 # Include variables and define needed variables.
 - name: Debian | Include OS-specific variables.
-  include_vars: "main.yml"
+  include_vars: "default.yml"
 
-- name: Add DotDeb Key
+- name: Nginx install
   become: true
-  apt_key:
-    url: https://www.dotdeb.org/dotdeb.gpg
-    state: present
+  apt:
+    name: nginx
+    state: latest
 
-- name: Add DotDeb to repository
+- name: Start Nginx
   become: true
-  apt_repository:
-    repo: deb http://packages.dotdeb.org jessie all
-    state: present
+  service:
+    name: nginx
+    state: started
+    enabled: true
 
-- name: Add DotDeb Src to repository
-  become: true
-  apt_repository:
-    repo: deb-src http://packages.dotdeb.org jessie all
-    state: present
+- name: Remove default conf of Nginx
+  become: yes
+  file: 
+    path: /etc/nginx/sites-available/default 
+    state: absent
+
+- name: Create new Nginx conf
+  template:
+    src: templates/nginx.j2
+    dest: /etc/nginx/sites-available/local.dev
+  become: yes
+
+- name: Active domain
+  file:
+    src: /etc/nginx/sites-available/local.dev
+    dest: /etc/nginx/sites-enabled/local.dev
+    state: link
+  become: yes
+
+- name: Nginx reload
+  service:
+    name: nginx
+    state: restarted
 
 - name: PHP install
   become: true
@@ -30,19 +49,19 @@
 
 - name: Security
   lineinfile:
-    dest: /etc/php/7.0/fpm/php.ini
+    dest: /etc/php/7.3/apache2/php.ini
     regexp: 'disable_functions[\s]?='
     line: 'disable_functions = exec,passthru,shell_exec,proc_open,popen'
 - lineinfile:
-    dest: /etc/php/7.0/fpm/php.ini
+    dest: /etc/php/7.3/apache2/php.ini
     regexp: 'upload_max_filesize[\s]?='
     line: 'upload_max_filesize = {{ php_upload_max_filesize }}'
 - lineinfile:
-    dest: /etc/php/7.0/fpm/php.ini
+    dest: /etc/php/7.3/apache2/php.ini
     regexp: 'memory_limit[\s]?='
     line: 'memory_limit = {{ php_memory_limit }}'
 - lineinfile:
-    dest: /etc/php/7.0/fpm/php.ini
+    dest: /etc/php/7.3/apache2/php.ini
     regexp: 'date.timezone[\s]?='
     line: 'date.timezone = {{ php_timezone }}'
     notify: php restart

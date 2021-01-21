@@ -1,0 +1,11 @@
+server{
+    server_name www.local.dev;
+    return 301 $scheme://local.dev$request_uri;
+}
+
+server{
+    server_name local.dev;
+    root /var/www/local.dev;
+
+    index index.html;
+}

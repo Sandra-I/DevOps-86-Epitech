@@ -1,0 +1,16 @@
+php_packages:
+  - php 
+  - php-common 
+  - php-xml
+  - php-gd 
+  - php-opcache 
+  - php-mbstring 
+  - php-tokenizer 
+  - php-json 
+  - php-bcmath 
+  - php-zip 
+  - unzip
+php_timezone: Europe/Paris
+php_upload_max_filesize: "20M"
+php_post_max_size: "20M"
+php_memory_limit: "1024M"

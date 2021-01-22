@@ -16,12 +16,6 @@
     state: started
     enabled: true
 
-- name: Remove default conf of Nginx
-  become: yes
-  file: 
-    path: /etc/nginx/sites-available/default 
-    state: absent
-
 - name: Create new Nginx conf
   template:
     src: templates/nginx.j2

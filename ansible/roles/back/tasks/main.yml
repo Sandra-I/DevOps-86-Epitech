@@ -16,20 +16,26 @@
     state: started
     enabled: true
 
+- name: Remove old Nginx conf
+  file:
+    path: ['/etc/nginx/sites-enabled/default', '/etc/nginx/sites-available/default']
+    state: absent
+  become: yes
+
 - name: Create new Nginx conf
   template:
     src: templates/nginx.j2
-    dest: /etc/nginx/sites-available/local.dev
+    dest: /etc/nginx/sites-available/back.testlab.com
   become: yes
 
 - name: Active domain
   file:
-    src: /etc/nginx/sites-available/local.dev
-    dest: /etc/nginx/sites-enabled/local.dev
+    src: /etc/nginx/sites-available/back.testlab.com
+    dest: /etc/nginx/sites-enabled/back.testlab.com
     state: link
   become: yes
 
-- name: Nginx reload
+- name: Nginx restart
   service:
     name: nginx
     state: restarted
@@ -58,4 +64,3 @@
     dest: /etc/php/7.3/apache2/php.ini
     regexp: 'date.timezone[\s]?='
     line: 'date.timezone = {{ php_timezone }}'
-    notify: php restart

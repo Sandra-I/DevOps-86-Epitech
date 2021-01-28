@@ -42,7 +42,8 @@ export class AppComponent implements OnInit {
             this.healthy = 'argh';
         },
         (err) => {
-          this.health = 'Failed to request backend';
+          this.health = environment.api_endpoint + '/health';
+          //this.health = 'Failed to request backend';
           this.healthy = 'argh';
           console.error(err);
         },

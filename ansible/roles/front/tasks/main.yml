@@ -1,0 +1,85 @@
+---
+- name: Nginx install
+  become: true
+  apt:
+    name: nginx
+    state: latest
+
+- name: Start Nginx
+  become: true
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Remove old Nginx conf
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items: 
+    - /etc/nginx/sites-enabled/default
+    - /etc/nginx/sites-available/default
+  become: yes
+
+- name: Create new Nginx conf
+  template:
+    src: templates/nginx.j2
+    dest: /etc/nginx/sites-available/front.testlab.com
+  become: yes
+
+- name: Active domain
+  file:
+    src: /etc/nginx/sites-available/front.testlab.com
+    dest: /etc/nginx/sites-enabled/front.testlab.com
+    state: link
+  become: yes
+
+- name: Nginx restart
+  service:
+    name: nginx
+    state: restarted
+
+- name: Install NodeJS
+  apt: 
+    name: nodejs
+    update_cache: yes
+    state: latest
+
+- name: Install Npm
+  apt: 
+    name: npm
+    update_cache: yes
+    state: latest
+
+- name: Install PM2
+  npm:
+    name: pm2
+    global: yes
+
+- name: Install Angular.js
+  become: yes
+  npm:
+    name: "@angular/cli"
+    global: yes
+    state: present
+
+- name: Git Clone Repo
+  git: 
+    repo: 'https://gitlab.com/bastien-angles/devops-86.git'
+    dest: /var/www/front.testlab.com
+
+- name: Install packages based on package.json
+  npm:
+    path:  /var/www/front.testlab.com/front
+    state: latest
+
+- name: Create new prod env conf
+  template:
+    src: templates/prod.j2
+    dest: /var/www/front.testlab.com/front/src/environments/environment.prod.ts
+  become: yes
+
+- name: Build Angular app
+  command: ng build --prod
+  args:
+    chdir: /var/www/front.testlab.com/front

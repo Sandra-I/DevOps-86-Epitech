@@ -18,8 +18,11 @@
 
 - name: Remove old Nginx conf
   file:
-    path: ['/etc/nginx/sites-enabled/default', '/etc/nginx/sites-available/default']
+    path: "{{ item }}"
     state: absent
+  with_items: 
+    - /etc/nginx/sites-enabled/default
+    - /etc/nginx/sites-available/default
   become: yes
 
 - name: Create new Nginx conf
@@ -64,3 +67,70 @@
     dest: /etc/php/7.3/apache2/php.ini
     regexp: 'date.timezone[\s]?='
     line: 'date.timezone = {{ php_timezone }}'
+
+- name: Ensures Composer Dir exists
+  file: 
+    path: /usr/src/composer 
+    state: directory
+
+- name: Download Composer
+  get_url:
+    url: https://getcomposer.org/installer
+    dest: /usr/src/composer/installer
+    checksum: "sha384:756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3"
+  become: yes
+
+- name: Install Composer
+  shell: php installer
+  args:
+    chdir: /usr/src/composer
+  become: yes
+
+- name: Add Composer to global path
+  copy: 
+    dest: /usr/local/bin/composer
+    group: root
+    mode: '0755'
+    owner: root
+    src: /usr/src/composer/composer.phar
+    remote_src: yes
+  become: yes
+
+- name: Install Npm
+  apt: 
+    name: npm
+    update_cache: yes
+    state: latest
+  
+- name: Git Clone Repo
+  git: 
+    repo: https://gitlab.com/bastien-angles/devops-86.git
+    dest: /var/www/back.testlab.com
+    version: "master"
+  become: yes
+
+- name: Create new .env
+  template:
+    src: templates/env.j2
+    dest: /var/www/back.testlab.com/back/.env
+  become: yes
+
+- name: Remove old composer.lock
+  file:
+    path: /var/www/back.testlab.com/back/composer.lock
+    state: absent
+  become: yes
+
+- name: Install packages based on composer.json
+  expect:
+    chdir: /var/www/back.testlab.com/back
+    command: composer update
+    responses:
+      (.*)Continue as root/super user(.*): "yes"
+    timeout: 300
+
+
+- name: Install packages based on package.json
+  shell: npm install
+  args:
+    chdir: /var/www/back.testlab.com/back

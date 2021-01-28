@@ -2,12 +2,12 @@ server {
     listen 80;
     listen [::]:80;
 
-    root /var/www/back.testlab.com;
-    index index.html index.htm index.nginx-debian.html;
+    root /var/www/back.testlab.com/back;
+    index index.php index.html index.htm index.nginx-debian.html;
 
-    server_name your_domain www.back.testlab.com;
+    server_name www.back.testlab.com;
 
     location / {
-        try_files $uri $uri/ =404;
+        try_files $uri $uri/ /index.php?$query_string;
     }
 }

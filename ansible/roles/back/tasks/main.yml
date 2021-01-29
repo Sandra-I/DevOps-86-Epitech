@@ -129,8 +129,12 @@
       (.*)Continue as root/super user(.*): "yes"
     timeout: 300
 
-
 - name: Install packages based on package.json
   shell: npm install
+  args:
+    chdir: /var/www/back.testlab.com/back
+
+- name: Launch migration and seeders
+  shell: php artisan migrate:refresh --seed
   args:
     chdir: /var/www/back.testlab.com/back

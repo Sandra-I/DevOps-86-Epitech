@@ -1,7 +1,36 @@
 ---
-- name: Install MySQL
+- name: Install MySQL and require packages
   become: yes
   apt: 
-    name: ['mariadb-server', 'mariadb-client']
+    name: ['mariadb-server', 'mariadb-client', 'python-pip', 'python-dev', 'default-libmysqlclient-dev']
     update_cache: yes
     state: latest
+
+- name: Install MySqlClient python package
+  pip:
+    name: mysqlclient
+
+- name: Create a new database with name 'maindb'
+  mysql_db:
+    name: maindb
+    state: present
+  become: yes
+
+- name: Create new database user
+  mysql_user:
+    name: laravel
+    password: 12345
+    host: '192.168.56.100'
+    priv: 'maindb.*:ALL'
+    state: present
+  become: yes
+
+- name: Update MariaDB conf to allow remote connection
+  template:
+    src: templates/mariadb_conf.j2
+    dest: /etc/mysql/mariadb.conf.d/50-server.cnf
+  become: yes
+
+- name: Restart MariaDB
+  shell: systemctl restart mariadb.service
+  become: yes

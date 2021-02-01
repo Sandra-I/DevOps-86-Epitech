@@ -2,45 +2,9 @@
 - name: Debian | Include OS-specific variables
   include_vars: "default.yml"
 
-- name: Nginx install
-  become: true
-  apt:
-    name: nginx
-    state: latest
-
-- name: Start Nginx
-  become: true
-  service:
-    name: nginx
-    state: started
-    enabled: true
-
-- name: Remove old Nginx conf
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items: 
-    - /etc/nginx/sites-enabled/default
-    - /etc/nginx/sites-available/default
-  become: yes
-
-- name: Create new Nginx conf
-  template:
-    src: templates/nginx.j2
-    dest: "/etc/nginx/sites-available/{{ hostname.back }}"
-  become: yes
-
-- name: Active domain
-  file:
-    src: "/etc/nginx/sites-available/{{ hostname.back }}"
-    dest: "/etc/nginx/sites-enabled/{{ hostname.back }}"
-    state: link
-  become: yes
-
-- name: Nginx restart
-  service:
-    name: nginx
-    state: restarted
+- include: nginx.yml
+  vars:
+    current_host: "{{ hostname.back }}"
 
 - name: PHP install
   become: true
@@ -54,15 +18,15 @@
     dest: /etc/php/7.3/cli/php.ini
     regexp: 'disable_functions[\s]?='
     line: 'disable_functions = exec,passthru,shell_exec,popen'
-- lineinfile:
+  lineinfile:
     dest: /etc/php/7.3/cli/php.ini
     regexp: 'upload_max_filesize[\s]?='
     line: 'upload_max_filesize = {{ php_upload_max_filesize }}'
-- lineinfile:
+  lineinfile:
     dest: /etc/php/7.3/cli/php.ini
     regexp: 'memory_limit[\s]?='
     line: 'memory_limit = {{ php_memory_limit }}'
-- lineinfile:
+  lineinfile:
     dest: /etc/php/7.3/cli/php.ini
     regexp: 'date.timezone[\s]?='
     line: 'date.timezone = {{ php_timezone }}'
@@ -102,7 +66,6 @@
     state: latest
 
 - name: Install Python Pip dependencies
-  become: yes
   apt: 
     name: ['python-pip', 'python-dev']
     update_cache: yes

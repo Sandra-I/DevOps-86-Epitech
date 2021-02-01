@@ -1,5 +1,5 @@
 ---
-- name: Install web servers
+- name: Install global servers
   hosts: all
   remote_user: root
 
@@ -19,6 +19,7 @@
         state: present
         update_cache: yes
 
+
 - name: Install database server
   hosts: database
   remote_user: root
@@ -35,11 +36,6 @@
 - name: Install back server
   hosts: back
   remote_user: root
-
-  pre_tasks:
-    - name: "Ciai"
-      debug:
-        msg: "{{ hostvars[groups['database'][0]]['password'] }}"
 
   roles:
     - role: back

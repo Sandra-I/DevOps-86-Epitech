@@ -1,43 +1,7 @@
 ---
-- name: Nginx install
-  become: true
-  apt:
-    name: nginx
-    state: latest
-
-- name: Start Nginx
-  become: true
-  service:
-    name: nginx
-    state: started
-    enabled: true
-
-- name: Remove old Nginx conf
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items: 
-    - /etc/nginx/sites-enabled/default
-    - /etc/nginx/sites-available/default
-  become: yes
-
-- name: Create new Nginx conf
-  template:
-    src: templates/nginx.j2
-    dest: "/etc/nginx/sites-available/{{ hostname.front }}"
-  become: yes
-
-- name: Active domain
-  file:
-    src: "/etc/nginx/sites-available/{{ hostname.front }}"
-    dest: "/etc/nginx/sites-enabled/{{ hostname.front }}"
-    state: link
-  become: yes
-
-- name: Nginx restart
-  service:
-    name: nginx
-    state: restarted
+- include: ../../back/tasks/nginx.yml
+  vars:
+    current_host: "{{ hostname.front }}"
 
 - name: Install NodeJS
   apt: 

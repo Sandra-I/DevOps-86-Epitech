@@ -1,7 +1,4 @@
 ---
-- debug:
-    msg: "{{ db_password }}"
-
 - name: Install MySQL and require packages
   become: yes
   apt: 

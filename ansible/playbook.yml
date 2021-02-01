@@ -4,14 +4,16 @@
   remote_user: root
 
   tasks:
+    - name: Set environement variables
+      include_vars: env_vars.yml
+
     - name: Install prerequies
       apt: 
-        name: aptitude
-        update_cache: yes 
+        name: aptitude        
         state: latest
-        force_apt_get: yes
+        update_cache: yes
 
-    - name: Install git
+    - name: Install Git
       apt:
         name: git
         state: present
@@ -21,15 +23,27 @@
   hosts: database
   remote_user: root
 
+  pre_tasks:
+    - name: Generate secure password
+      set_fact:
+        password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+
   roles:
-    - mysql
+    - role: mysql
+      db_password: "{{ password }}"  
 
 - name: Install back server
   hosts: back
   remote_user: root
 
+  pre_tasks:
+    - name: "Ciai"
+      debug:
+        msg: "{{ hostvars[groups['database'][0]]['password'] }}"
+
   roles:
-    - back
+    - role: back
+      db_password: "{{ hostvars[groups['database'][0]]['password'] }}"
 
 - name: Install front server
   hosts: front

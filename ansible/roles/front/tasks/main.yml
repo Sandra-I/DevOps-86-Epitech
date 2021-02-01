@@ -24,13 +24,13 @@
 - name: Create new Nginx conf
   template:
     src: templates/nginx.j2
-    dest: /etc/nginx/sites-available/front.testlab.com
+    dest: "/etc/nginx/sites-available/{{ hostname.front }}"
   become: yes
 
 - name: Active domain
   file:
-    src: /etc/nginx/sites-available/front.testlab.com
-    dest: /etc/nginx/sites-enabled/front.testlab.com
+    src: "/etc/nginx/sites-available/{{ hostname.front }}"
+    dest: "/etc/nginx/sites-enabled/{{ hostname.front }}"
     state: link
   become: yes
 
@@ -65,21 +65,21 @@
 
 - name: Git Clone Repo
   git: 
-    repo: 'https://gitlab.com/bastien-angles/devops-86.git'
-    dest: /var/www/front.testlab.com
+    repo: "{{ git_repository }}"
+    dest: "/var/www/{{ hostname.front }}"
 
 - name: Install packages based on package.json
   npm:
-    path:  /var/www/front.testlab.com/front
+    path: "/var/www/{{ hostname.front }}/front"
     state: latest
 
 - name: Create new prod env conf
   template:
     src: templates/prod.j2
-    dest: /var/www/front.testlab.com/front/src/environments/environment.prod.ts
+    dest: "/var/www/{{ hostname.front }}/front/src/environments/environment.prod.ts"
   become: yes
 
 - name: Build Angular app
   command: ng build --prod
   args:
-    chdir: /var/www/front.testlab.com/front
+    chdir: "/var/www/{{ hostname.front }}/front"

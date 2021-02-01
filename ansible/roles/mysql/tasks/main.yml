@@ -1,4 +1,7 @@
 ---
+- debug:
+    msg: "{{ db_password }}"
+
 - name: Install MySQL and require packages
   become: yes
   apt: 
@@ -19,8 +22,8 @@
 - name: Create new database user
   mysql_user:
     name: laravel
-    password: 12345
-    host: '192.168.56.100'
+    password: "{{ db_password }}"
+    host: "{{ ip.back }}"
     priv: 'maindb.*:ALL'
     state: present
   become: yes

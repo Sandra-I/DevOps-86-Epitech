@@ -1,0 +1,11 @@
+hostname: 
+  front: front.test.com
+  back: back.test.com
+  mysql: mysql.test.com
+
+ip:
+  front: 192.168.56.20
+  back: 192.168.56.100
+  mysql: 192.168.56.10
+
+git_repository: https://gitlab.com/bastien-angles/devops-86.git

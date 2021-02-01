@@ -11,6 +11,7 @@ php_packages:
   - php-zip
   - php-fpm
   - php-mysql
+  - php-curl
   - unzip
 php_timezone: Europe/Paris
 php_upload_max_filesize: "20M"

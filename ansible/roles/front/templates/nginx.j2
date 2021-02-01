@@ -2,10 +2,10 @@ server {
     listen 80;
     listen [::]:80;
 
-    root /var/www/front.testlab.com/front/dist/front;
+    root /var/www/{{ hostname.front }}/front/dist/front;
     index index.html index.htm index.nginx-debian.html;
 
-    server_name www.front.testlab.com;
+    server_name www.{{ hostname.front }};
 
     location / {
         try_files $uri $uri/ =404;

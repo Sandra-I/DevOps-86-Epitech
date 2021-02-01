@@ -2,10 +2,10 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server ipv6only=on;
 
-    root /var/www/back.testlab.com/back/public;
+    root /var/www/{{ hostname.back }}/back/public;
     index index.php index.html index.htm;
 
-    server_name 192.168.56.100;
+    server_name www.{{ hostname.back }};
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;

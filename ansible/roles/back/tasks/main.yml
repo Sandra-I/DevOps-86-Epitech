@@ -1,6 +1,5 @@
 ---
-# Include variables and define needed variables.
-- name: Debian | Include OS-specific variables.
+- name: Debian | Include OS-specific variables
   include_vars: "default.yml"
 
 - name: Nginx install
@@ -28,13 +27,13 @@
 - name: Create new Nginx conf
   template:
     src: templates/nginx.j2
-    dest: /etc/nginx/sites-available/back.testlab.com
+    dest: "/etc/nginx/sites-available/{{ hostname.back }}"
   become: yes
 
 - name: Active domain
   file:
-    src: /etc/nginx/sites-available/back.testlab.com
-    dest: /etc/nginx/sites-enabled/back.testlab.com
+    src: "/etc/nginx/sites-available/{{ hostname.back }}"
+    dest: "/etc/nginx/sites-enabled/{{ hostname.back }}"
     state: link
   become: yes
 
@@ -52,19 +51,19 @@
 
 - name: Security
   lineinfile:
-    dest: /etc/php/7.3/apache2/php.ini
+    dest: /etc/php/7.3/cli/php.ini
     regexp: 'disable_functions[\s]?='
-    line: 'disable_functions = exec,passthru,shell_exec,proc_open,popen'
+    line: 'disable_functions = exec,passthru,shell_exec,popen'
 - lineinfile:
-    dest: /etc/php/7.3/apache2/php.ini
+    dest: /etc/php/7.3/cli/php.ini
     regexp: 'upload_max_filesize[\s]?='
     line: 'upload_max_filesize = {{ php_upload_max_filesize }}'
 - lineinfile:
-    dest: /etc/php/7.3/apache2/php.ini
+    dest: /etc/php/7.3/cli/php.ini
     regexp: 'memory_limit[\s]?='
     line: 'memory_limit = {{ php_memory_limit }}'
 - lineinfile:
-    dest: /etc/php/7.3/apache2/php.ini
+    dest: /etc/php/7.3/cli/php.ini
     regexp: 'date.timezone[\s]?='
     line: 'date.timezone = {{ php_timezone }}'
 
@@ -101,29 +100,34 @@
     name: npm
     update_cache: yes
     state: latest
+
+- name: Install Python Pip dependencies
+  become: yes
+  apt: 
+    name: ['python-pip', 'python-dev']
+    update_cache: yes
+    state: latest
+
+- name: Install Expect python package
+  pip:
+    name: pexpect
   
 - name: Git Clone Repo
   git: 
-    repo: https://gitlab.com/bastien-angles/devops-86.git
-    dest: /var/www/back.testlab.com
+    repo: "{{ git_repository }}"
+    dest: "/var/www/{{ hostname.back }}"
     version: "master"
   become: yes
 
 - name: Create new .env
   template:
     src: templates/env.j2
-    dest: /var/www/back.testlab.com/back/.env
-  become: yes
-
-- name: Remove old composer.lock
-  file:
-    path: /var/www/back.testlab.com/back/composer.lock
-    state: absent
+    dest: "/var/www/{{ hostname.back }}/back/.env"
   become: yes
 
 - name: Install packages based on composer.json
   expect:
-    chdir: /var/www/back.testlab.com/back
+    chdir: "/var/www/{{ hostname.back }}/back"
     command: composer update
     responses:
       (.*)Continue as root/super user(.*): "yes"
@@ -132,9 +136,25 @@
 - name: Install packages based on package.json
   shell: npm install
   args:
-    chdir: /var/www/back.testlab.com/back
+    chdir: "/var/www/{{ hostname.back }}/back"
 
 - name: Launch migration and seeders
   shell: php artisan migrate:refresh --seed
   args:
-    chdir: /var/www/back.testlab.com/back
+    chdir: "/var/www/{{ hostname.back }}/back"
+
+- name: Give permissions to storage and bootstrap/cache
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: www-data
+    mode: '775'
+    recurse: yes
+  with_items:
+    - '/var/www/{{ hostname.back }}/back/storage'
+    - '/var/www/{{ hostname.back }}/back/bootstrap/cache'
+
+- name: Launch migration and seeders
+  shell: php artisan migrate:refresh --seed
+  args:
+    chdir: "/var/www/{{ hostname.back }}/back"

@@ -1,0 +1,40 @@
+---
+- name: Nginx install
+  become: true
+  apt:
+    name: nginx
+    state: latest
+
+- name: Start Nginx
+  become: true
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Remove old Nginx conf
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items: 
+    - /etc/nginx/sites-enabled/default
+    - /etc/nginx/sites-available/default
+  become: yes
+
+- name: Create new Nginx conf
+  template:
+    src: templates/nginx.j2
+    dest: "/etc/nginx/sites-available/{{ current_host }}"
+  become: yes
+
+- name: Active domain
+  file:
+    src: "/etc/nginx/sites-available/{{ current_host }}"
+    dest: "/etc/nginx/sites-enabled/{{ current_host }}"
+    state: link
+  become: yes
+
+- name: Nginx restart
+  service:
+    name: nginx
+    state: restarted

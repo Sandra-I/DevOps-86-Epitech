@@ -8,9 +8,11 @@
 3. In our case of use, these 3 machines must have a static ip and a hostname. You can reproduce the communication scheme below or adapt it according to your needs.
 <br/><br/>
 ![Screenshot](./documentation/server_schema.png)
-<br/>
+<br/><br/>
 *Useful to setup this configuration* : ./documentation/set_minimal_envs.md
+
 4. Install SSH and generate a key in each of these servers.
+
 ```bash
 sudo apt install openssh-server -y
 sudo apt install ufw
@@ -19,6 +21,7 @@ sudo ufw allow ssh
 cd /root/.ssh/
 sudo ssh-keygen
 ```
+
 5. Install Python in each servers.
 ```bash
 sudo apt install python -y
@@ -58,4 +61,4 @@ ansible --version
 ```bash
 ansible-playbook -i ansible/hosts ansible/playbook.yml
 ```
-11. Now, you can access the front app on http://192.168.56.20 or by http://front.dev. In this last case, you will need to edit your hostname file in your main machine. 
+11. Now, you can access the front app on http://front.test.com. In this last case, you will need to edit your hostname file in your main machine. 

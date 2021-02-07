@@ -1,6 +1,6 @@
 # Official framework image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/php
-image: php:7.4
+image: tetraweb/php
 
 # Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
@@ -39,6 +39,10 @@ before_script:
   - docker-php-ext-enable xdebug
   # Install Composer and project dependencies.
   - curl -sS https://getcomposer.org/installer | php
+  - apt-get install zip unzip
+  - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+  - php composer-setup.php
+  - php -r "unlink('composer-setup.php');"
   - php composer.phar install
   # Install Node dependencies.
   # comment this out if you don't have a node dependency

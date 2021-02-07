@@ -1,0 +1,39 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  image: trion/ng-cli
+  allow_failure: false
+  before_script:
+    - npm i
+  script:
+    - ng build --prod
+  artifacts:
+    expire_in: 2 hours
+    paths:
+      - dist/
+
+variables:
+  CLI_VERSION: 6.2.1
+
+test:karma:
+  stage: test
+  image: trion/ng-cli-karma:${CLI_VERSION}
+  allow_failure: false
+  before_script:
+    - npm i
+    - export CHROME_BIN=/usr/bin/google-chrome
+  script:
+    - npm test
+
+test:e2e:
+  stage: test
+  image: trion/ng-cli-e2e:11.0.0
+  allow_failure: false
+  before_script:
+    - npm i
+  script:
+    - ./node_modules/protractor/bin/webdriver-manager update --versions.chrome 86.0.4240.198
+    - ng e2e --webdriver-update=false

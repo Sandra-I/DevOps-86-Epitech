@@ -63,7 +63,7 @@ before_script:
   # Run database migrations.
   - php artisan migrate
   # Run database seed
-  - php artisan db:seed
+ # - php artisan db:seed
 
 test:
   script:

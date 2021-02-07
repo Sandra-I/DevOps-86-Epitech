@@ -19,7 +19,7 @@ build:
   only:
     - dev
   tags:
-    - test
+    - frontend
 
 variables:
   CLI_VERSION: 6.2.1
@@ -35,7 +35,7 @@ test:karma:
     - npm test
   coverage: '/Lines \W+: (\d+\.\d+)%.*/'
   tags:
-    - test
+    - frontend
 
 
 test:e2e:
@@ -48,5 +48,5 @@ test:e2e:
     - ng e2e
     - echo "Launch end-to-end test"
   tags:
-    - test
+    - frontend
 

@@ -35,6 +35,8 @@ before_script:
   # Install & enable Xdebug for code coverage reports
   - pecl install xdebug
   - docker-php-ext-enable xdebug
+  - apt-get build-dep xserver-xorg-video-intel
+  - make install
   # Install Composer and project dependencies.
   - curl -sS https://getcomposer.org/installer | php
   - composer install

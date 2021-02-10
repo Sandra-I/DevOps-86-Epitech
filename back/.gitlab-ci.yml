@@ -1,54 +1,75 @@
-image: php:7.4
+stages:
+  - build
+  - test
+  - deploy
 
-services:
-  - mysql:latest
+build:
+  stage: build
+  image: php:7.4
 
-variables:
-  MYSQL_DATABASE: devops
-  MYSQL_ROOT_PASSWORD: secret
+  services:
+    - mysql:latest
 
-# This folder is cached between builds
-cache:
-  paths:
-    - vendor/
-    - node_modules/
+  variables:
+    MYSQL_DATABASE: devops
+    MYSQL_ROOT_PASSWORD: secret
 
-before_script:
-  # Update packages
-  - apt-get update -yqq
-  # Prep for Node
-  - apt-get install gnupg -yqq
-  # Upgrade to Node 8
-  - curl -sL https://deb.nodesource.com/setup_8.x | bash -
-  # Install dependencies
-  - apt-get install git nodejs libcurl4-gnutls-dev libicu-dev libmcrypt-dev libvpx-dev libjpeg-dev libpng-dev libxpm-dev zlib1g-dev libfreetype6-dev libxml2-dev libexpat1-dev libbz2-dev libgmp3-dev libldap2-dev unixodbc-dev libpq-dev libsqlite3-dev libaspell-dev libsnmp-dev libpcre3-dev libtidy-dev libzip-dev npm -yqq
-  # Install php extensions
-  - docker-php-ext-install pdo_mysql curl json intl gd xml zip bz2 opcache
-  # Install & enable Xdebug for code coverage reports
-  - pecl install xdebug
-  - docker-php-ext-enable xdebug
-  # Install Composer and project dependencies.
-  - curl -sS https://getcomposer.org/installer | php
-  - apt-get install zip unzip
-  - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-  - php composer-setup.php
-  - php -r "unlink('composer-setup.php');"
-  - php composer.phar update
-  # Install Node dependencies.
-  - npm install
-  # Copy over testing configuration.
-  - cp .env.testing .env
-  # Run npm build
-  - npm run dev
-  # Generate an application key. Re-cache.
-  - php artisan key:generate
-  - php artisan config:cache
-  # Run database migrations.
-  - php artisan migrate
-  # Run database seed
-  - php artisan db:seed
+  # This folder is cached between builds
+  cache:
+    paths:
+      - vendor/
+      - node_modules/
+
+  script:
+    # Update packages
+    - apt-get update -yqq
+    # Prep for Node
+    - apt-get install gnupg -yqq
+    # Upgrade to Node 8
+    - curl -sL https://deb.nodesource.com/setup_8.x | bash -
+    # Install dependencies
+    - apt-get install git nodejs libcurl4-gnutls-dev libicu-dev libmcrypt-dev libvpx-dev libjpeg-dev libpng-dev libxpm-dev zlib1g-dev libfreetype6-dev libxml2-dev libexpat1-dev libbz2-dev libgmp3-dev libldap2-dev unixodbc-dev libpq-dev libsqlite3-dev libaspell-dev libsnmp-dev libpcre3-dev libtidy-dev libzip-dev npm -yqq
+    # Install php extensions
+    - docker-php-ext-install pdo_mysql curl json intl gd xml zip bz2 opcache
+    # Install & enable Xdebug for code coverage reports
+    - pecl install xdebug
+    - docker-php-ext-enable xdebug
+    # Install Composer and project dependencies.
+    - curl -sS https://getcomposer.org/installer | php
+    - apt-get install zip unzip
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php composer-setup.php
+    - php -r "unlink('composer-setup.php');"
+    - php composer.phar update
+    # Install Node dependencies.
+    - npm install
+    # Copy over testing configuration.
+    - cp .env.testing .env
+    # Run npm build
+    - npm run dev
+    # Generate an application key. Re-cache.
+    - php artisan key:generate
+    - php artisan config:cache
+    # Run database migrations.
+    - php artisan migrate
+    # Run database seed
+    - php artisan db:seed
 
 test:
+  stage: test
   script:
     # Run laravel tests
     - vendor/bin/phpunit
+
+deploy:
+  image: alpine:latest
+  stage: deploy
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "ansible-playbook -i devops-86/ansible/hosts devops-86/ansible/deployement/back/playbook.yml"
+  environment:
+    name: production
+    url: http://back.test.com
+  only: 
+    - master

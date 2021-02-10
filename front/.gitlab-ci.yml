@@ -30,10 +30,10 @@ test:karma:
 
 test:e2e:
   stage: test
-  image: trion/ng-cli-e2e:11.0.0
+  image: trion/ng-cli-e2e:${CLI_VERSION}
   allow_failure: false
   before_script:
     - npm i
   script:
-    - ./node_modules/protractor/bin/webdriver-manager update --versions.chrome 86.0.4240.198
+    - ./node_modules/protractor/bin/webdriver-manager update --versions.chrome
     - ng e2e --webdriver-update=false

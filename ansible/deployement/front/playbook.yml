@@ -1,0 +1,32 @@
+---
+- name: Get last updates in Back
+  hosts: front
+  remote_user: root
+
+  tasks:
+    - name: Set environement variables
+      include_vars: ../../env_vars.yml
+
+    - name: Git Pull Master
+      git: 
+        repo: "{{ front_repository }}"
+        dest: "/var/www/{{ hostname.front }}"
+        update: yes
+        force: yes
+        version: master
+
+    - name: Update packages based on package.json
+      npm:
+        path: "/var/www/{{ hostname.front }}"
+        state: latest     
+
+    - name: Refresh prod env conf
+      template:
+        src: ../../roles/front/templates/prod.j2
+        dest: "/var/www/{{ hostname.front }}/src/environments/environment.prod.ts"
+      become: yes
+
+    - name: Build Angular app
+      command: ng build --prod
+      args:
+        chdir: "/var/www/{{ hostname.front }}"

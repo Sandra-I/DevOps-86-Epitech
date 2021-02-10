@@ -1,0 +1,45 @@
+---
+- name: Git Pull Master
+  hosts: back
+  remote_user: root
+
+  tasks:
+    - name: Set environement variables
+      include_vars: ../../env_vars.yml
+
+    - name: Git Pull Master
+      git: 
+        repo: "{{ back_repository }}"
+        dest: "/var/www/{{ hostname.back }}"
+        update: yes
+        force: yes
+        version: master
+
+    - name: Update packages based on package.json
+      npm:
+        path: "/var/www/{{ hostname.back }}/back"
+        state: latest
+
+    - name: Update packages based on composer.json
+      expect:
+        chdir: "/var/www/{{ hostname.back }}/back"
+        command: composer update
+        responses:
+          (.*)Continue as root/super user(.*): "yes"
+        timeout: 300
+
+    - name: Launch migration and seeders
+      shell: php artisan migrate --seed
+      args:
+        chdir: "/var/www/{{ hostname.back }}/back"
+
+    - name: Give permissions to storage and bootstrap/cache
+      file:
+        path: "{{ item }}"
+        owner: root
+        group: www-data
+        mode: '775'
+        recurse: yes
+      with_items:
+        - '/var/www/{{ hostname.back }}/back/storage'
+        - '/var/www/{{ hostname.back }}/back/bootstrap/cache'

@@ -29,21 +29,21 @@
 
 - name: Git Clone Repo
   git: 
-    repo: "{{ git_repository }}"
+    repo: "{{ front_repository }}"
     dest: "/var/www/{{ hostname.front }}"
 
 - name: Install packages based on package.json
   npm:
-    path: "/var/www/{{ hostname.front }}/front"
+    path: "/var/www/{{ hostname.front }}"
     state: latest
 
 - name: Create new prod env conf
   template:
     src: templates/prod.j2
-    dest: "/var/www/{{ hostname.front }}/front/src/environments/environment.prod.ts"
+    dest: "/var/www/{{ hostname.front }}/src/environments/environment.prod.ts"
   become: yes
 
 - name: Build Angular app
   command: ng build --prod
   args:
-    chdir: "/var/www/{{ hostname.front }}/front"
+    chdir: "/var/www/{{ hostname.front }}"

@@ -2,7 +2,7 @@ server {
     listen 80;
     listen [::]:80;
 
-    root /var/www/{{ hostname.front }}/front/dist/front;
+    root /var/www/{{ hostname.front }}/dist/front;
     index index.html index.htm index.nginx-debian.html;
 
     server_name www.{{ hostname.front }};

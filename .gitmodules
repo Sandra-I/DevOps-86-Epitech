@@ -1,3 +1,6 @@
 [submodule "front"]
 	path = front
 	url = git@gitlab.com:devops632/front.git
+[submodule "back"]
+	path = back
+	url = git@gitlab.com:devops632/back.git

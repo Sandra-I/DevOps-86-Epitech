@@ -17,12 +17,12 @@
 
     - name: Update packages based on package.json
       npm:
-        path: "/var/www/{{ hostname.back }}/back"
+        path: "/var/www/{{ hostname.back }}"
         state: latest
 
     - name: Update packages based on composer.json
       expect:
-        chdir: "/var/www/{{ hostname.back }}/back"
+        chdir: "/var/www/{{ hostname.back }}"
         command: composer update
         responses:
           (.*)Continue as root/super user(.*): "yes"
@@ -31,7 +31,7 @@
     - name: Launch migration and seeders
       shell: php artisan migrate --seed
       args:
-        chdir: "/var/www/{{ hostname.back }}/back"
+        chdir: "/var/www/{{ hostname.back }}"
 
     - name: Give permissions to storage and bootstrap/cache
       file:
@@ -41,5 +41,5 @@
         mode: '775'
         recurse: yes
       with_items:
-        - '/var/www/{{ hostname.back }}/back/storage'
-        - '/var/www/{{ hostname.back }}/back/bootstrap/cache'
+        - '/var/www/{{ hostname.back }}/storage'
+        - '/var/www/{{ hostname.back }}/bootstrap/cache'

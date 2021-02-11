@@ -8,5 +8,5 @@ ip:
   back: 192.168.56.100
   mysql: 192.168.56.10
 
-front_repository: https://gitlab.com/bastien-angles/devops-86/front.git
-back_repository: https://gitlab.com/bastien-angles/devops-86/back.git
+front_repository: https://gitlab.com/devops632/front.git
+back_repository: https://gitlab.com/devops632/back.git

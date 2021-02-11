@@ -120,4 +120,4 @@
 - name: Launch migration and seeders
   shell: php artisan migrate:refresh --seed
   args:
-    chdir: "/var/www/{{ hostname.back }}/back"
+    chdir: "/var/www/{{ hostname.back }}"
